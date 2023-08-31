@@ -51,7 +51,8 @@ class Training:
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
 
-        raise NotImplementedError
+        raise NotImplementedError('В дочернем классе необходимо '
+                                  'переопределить этот метод.')
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
@@ -74,8 +75,9 @@ class Running(Training):
     def get_spent_calories(self) -> float:
         return (
             (self.CALORIES_MEAN_SPEED_MULTIPLIER * self.get_mean_speed()
-             + self.CALORIES_MEAN_SPEED_SHIFT) * self.weight / self.M_IN_KM
-            * self.duration * self.MIN_IN_H)
+                + self.CALORIES_MEAN_SPEED_SHIFT) * self.weight / self.M_IN_KM
+            * self.duration * self.MIN_IN_H
+        )
 
 
 class SportsWalking(Training):
@@ -99,10 +101,10 @@ class SportsWalking(Training):
     def get_spent_calories(self) -> float:
         return (
             (self.CALORIES_WEIGHT_MULTIPLIER_1 * self.weight
-             + ((self.get_mean_speed() * self.KM_PER_H_IN_M_PER_S) ** 2
-                / (self.height / self.CM_IN_M))
-             * self.CALORIES_WEIGHT_MULTIPLIER_2 * self.weight) * self.duration
-            * self.MIN_IN_H
+                + ((self.get_mean_speed() * self.KM_PER_H_IN_M_PER_S) ** 2
+                    / (self.height / self.CM_IN_M))
+                * self.CALORIES_WEIGHT_MULTIPLIER_2 * self.weight)
+            * self.duration * self.MIN_IN_H
         )
 
 
@@ -140,7 +142,7 @@ class Swimming(Training):
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
 
-    workout_codes: dict[str, type[Running | SportsWalking | Swimming]] = {
+    workout_codes: dict[str, Training] = {
         'RUN': Running,
         'WLK': SportsWalking,
         'SWM': Swimming
@@ -149,7 +151,7 @@ def read_package(workout_type: str, data: list) -> Training:
     try:
         return workout_codes[workout_type](*data)
     except KeyError:
-        print('Неизвестный тип тренировки!')
+        raise KeyError('Передан неизвестный тип тренировки.')
 
 
 def main(training: Training) -> None:
@@ -168,5 +170,4 @@ if __name__ == '__main__':
 
     for workout_type, data in packages:
         training: Training = read_package(workout_type, data)
-        if training:
-            main(training)
+        main(training)
